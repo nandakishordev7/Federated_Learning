@@ -1,0 +1,29 @@
+# configs/aggregator_config.yaml
+# --------------------------------
+# Central Aggregator Configuration
+#
+# The aggregator is the "server" in Federated Learning.
+# It:
+#   1. Waits for all clients to connect.
+#   2. Sends the initial global model weights.
+#   3. Collects local weight updates each round.
+#   4. Runs FedAvg to produce a new global model.
+#   5. Broadcasts the updated global model back.
+#   6. Repeats for NUM_ROUNDS rounds.
+
+aggregator:
+  host: "127.0.0.1"
+  port: 5000
+
+federated_learning:
+  num_rounds: 10          # Number of FL training rounds
+  num_clients: 3          # Expected number of participating clients
+  min_clients: 3          # Minimum clients needed before a round starts
+
+model:
+  input_dim: 4            # Iris has 4 features
+  num_classes: 3          # Iris has 3 classes
+
+logging:
+  log_dir: "logs"
+  level: "INFO"

@@ -1,0 +1,28 @@
+# configs/client_config.yaml
+# ----------------------------
+# Federated Learning Client Configuration
+#
+# Each client:
+#   1. Loads its OWN local dataset (no sharing).
+#   2. Receives the global model weights from the aggregator.
+#   3. Trains locally for LOCAL_EPOCHS epochs.
+#   4. Sends ONLY the updated weights back (not the raw data).
+
+client:
+  aggregator_host: "127.0.0.1"
+  aggregator_port: 5000
+
+local_training:
+  local_epochs: 5         # How many epochs each client trains per round
+  batch_size: 16          # Mini-batch size for local SGD
+
+model:
+  input_dim: 4
+  num_classes: 3
+
+dataset:
+  dir: "dataset"          # Relative path to the dataset folder
+
+logging:
+  log_dir: "logs"
+  level: "INFO"
