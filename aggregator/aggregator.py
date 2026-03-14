@@ -35,6 +35,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
 import yaml
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 from model.iris_model   import build_model, get_weights, set_weights, weights_to_list, list_to_weights
 from utils.fed_avg      import federated_averaging
@@ -57,6 +58,7 @@ LOG_DIR     = cfg['logging']['log_dir']
 # ── Logger & Flask app ─────────────────────────────────────────
 log = get_logger('aggregator', LOG_DIR)
 app = Flask(__name__)
+CORS(app)  # Allow React dashboard on any port to call the aggregator
 
 # ── Shared server state (protected by a lock) ──────────────────
 state_lock          = threading.Lock()
@@ -130,9 +132,26 @@ def submit_update():
 def status():
     with state_lock:
         return jsonify({
-            'current_round':    current_round,
-            'num_registered':   len(registered_clients),
+            'current_round':          current_round,
+            'num_registered':         len(registered_clients),
             'num_updates_this_round': len(round_updates),
+            'is_complete':            current_round >= NUM_ROUNDS,
+        })
+
+
+@app.route('/client_metrics', methods=['GET'])
+def client_metrics():
+    """Return per-client sample counts from latest round updates."""
+    with state_lock:
+        metrics = {}
+        for cid, update in round_updates.items():
+            metrics[cid] = {
+                'n_samples':  update['n_samples'],
+                'num_layers': len(update['weights']),
+            }
+        return jsonify({
+            'round':   current_round,
+            'clients': metrics,
         })
 
 
